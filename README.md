@@ -1,5 +1,9 @@
 <div align="left"><img src="doc/image/espnet_logo1.png" width="550"/></div>
 
+# E2E-SincNet: toward fully end-to-end speech Recognition
+
+This repository is a fork of ESPnet and will contain the code for the paper "E2E-SincNet: toward fully end-to-end speech Recognition". The code is under preparation and should appear in the next two weeks. 
+
 # ESPnet: end-to-end speech processing toolkit
 
 [![Build Status](https://travis-ci.org/espnet/espnet.svg?branch=master)](https://travis-ci.org/espnet/espnet)
