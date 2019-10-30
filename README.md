@@ -4,6 +4,9 @@
 
 This repository is a fork of [ESPnet](https://github.com/espnet/espnet) and contains the code for the paper *E2E-SincNet: toward fully end-to-end speech Recognition*. E2E-SincNet is partially integrated to [ESPnet](https://github.com/espnet/espnet) due to major differences in the input data pipeline. E2E-SincNet will be part of the [SpeechBrain](https://speechbrain.github.io) toolkit. The provided code makes it feasible to reproduce obtained in the paper *E2E-SincNet: toward fully end-to-end speech Recognition*.
 
+TIMIT recipe: Ready to be used.
+WSJ recipe: In progress... 
+
 # Installation
 
 This repository is an enhanced version of an [ESPnet](https://github.com/espnet/espnet) fork. Therefore, the installation procedure is equivalent to the [ESPnet](https://github.com/espnet/espnet) one, making it easier to deploy SincNet in already existing setups.
