@@ -169,13 +169,13 @@ class E2E(E2E_ASR, ASRInterface, torch.nn.Module):
         # subsample info
         # +1 means input (+1) and layers outputs (args.elayer_sd + args.elayers)
         subsample = np.ones(args.elayers_sd + args.elayers + 1, dtype=np.int)
-        if args.etype.endswith("p") and not args.etype.startswith("vgg"):
+        if args.etype.endswith("p") and not args.etype.startswith("vgg") and not args.etype.startswith("sinc"):
             ss = args.subsample.split("_")
             for j in range(min(args.elayers_sd + args.elayers + 1, len(ss))):
                 subsample[j] = int(ss[j])
         else:
             logging.warning(
-                'Subsampling is not performed for vgg*. It is performed in max pooling layers at CNN.')
+                'Subsampling is not performed for vgg* and sinc*. It is performed in max pooling layers at CNN (Not performed at all for SincNet). ')
         logging.info('subsample: ' + ' '.join([str(x) for x in subsample]))
         self.subsample = subsample
 

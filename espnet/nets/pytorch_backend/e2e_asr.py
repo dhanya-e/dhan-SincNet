@@ -70,7 +70,7 @@ class E2E(ASRInterface, torch.nn.Module):
         group = parser.add_argument_group("E2E encoder setting")
         # encoder
         group.add_argument('--etype', default='blstmp', type=str,
-                           choices=['lstm', 'blstm', 'lstmp', 'blstmp', 'vgglstmp', 'vggblstmp', 'vgglstm', 'vggblstm',
+                           choices=['lstm', 'blstm', 'lstmp', 'blstmp', 'vgglstmp', 'vggblstmp','vggblstms','vgglstms', 'vgglstm', 'vggblstm', 'sinclstm', 'sincblstm', 'sinclstmp','sincblstmp', 'sincgru', 'sincbgru', 'sincgrup', 'sincbgrup', 'bligru',
                                     'gru', 'bgru', 'grup', 'bgrup', 'vgggrup', 'vggbgrup', 'vgggru', 'vggbgru'],
                            help='Type of encoder network architecture')
         group.add_argument('--elayers', default=4, type=int,
@@ -149,13 +149,14 @@ class E2E(ASRInterface, torch.nn.Module):
         # subsample info
         # +1 means input (+1) and layers outputs (args.elayer)
         subsample = np.ones(args.elayers + 1, dtype=np.int)
-        if args.etype.endswith("p") and not args.etype.startswith("vgg"):
+        if args.etype.endswith("p") and not args.etype.startswith("vgg") and not args.etype.startswith("sinc"):
+
             ss = args.subsample.split("_")
             for j in range(min(args.elayers + 1, len(ss))):
                 subsample[j] = int(ss[j])
         else:
             logging.warning(
-                'Subsampling is not performed for vgg*. It is performed in max pooling layers at CNN.')
+                'Subsampling is not performed for vgg* and sinc*. It is performed in max pooling layers at CNN (not performed at all with SincNet).')
         logging.info('subsample: ' + ' '.join([str(x) for x in subsample]))
         self.subsample = subsample
 
@@ -197,7 +198,8 @@ class E2E(ASRInterface, torch.nn.Module):
         # options for beam search
         if args.report_cer or args.report_wer:
             recog_args = {'beam_size': args.beam_size, 'penalty': args.penalty,
-                          'ctc_weight': args.ctc_weight, 'maxlenratio': args.maxlenratio,
+                          'ctc_weight': args.ctc_weight, 'ctc_window_margin': int(0),
+                          'maxlenratio': args.maxlenratio,
                           'minlenratio': args.minlenratio, 'lm_weight': args.lm_weight,
                           'rnnlm': args.rnnlm, 'nbest': args.nbest,
                           'space': args.sym_space, 'blank': args.sym_blank,

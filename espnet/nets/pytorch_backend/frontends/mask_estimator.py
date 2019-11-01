@@ -15,7 +15,7 @@ class MaskEstimator(torch.nn.Module):
         super().__init__()
         subsample = np.ones(layers + 1, dtype=np.int)
 
-        typ = type.lstrip("vgg").rstrip("p")
+        typ = type.lstrip("vgg").lstrip("sinc").rstrip("p")
         if type[-1] == "p":
             self.brnn = RNNP(idim, layers, units, projs, subsample, dropout,
                              typ=typ)

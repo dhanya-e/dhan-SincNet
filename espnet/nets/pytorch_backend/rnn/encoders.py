@@ -10,7 +10,7 @@ from torch.nn.utils.rnn import pad_packed_sequence
 from espnet.nets.e2e_asr_common import get_vgg2l_odim
 from espnet.nets.pytorch_backend.nets_utils import make_pad_mask
 from espnet.nets.pytorch_backend.nets_utils import to_device
-
+from espnet.nets.pytorch_backend.sincnet  import SincNet
 
 class RNNP(torch.nn.Module):
     """RNN with projection layer module
@@ -57,7 +57,8 @@ class RNNP(torch.nn.Module):
         :return: batch of hidden state sequences (B, Tmax, hdim)
         :rtype: torch.Tensor
         """
-        # logging.info(self.__class__.__name__ + ' input lengths: ' + str(ilens))
+
+        logging.info(self.__class__.__name__ + ' input lengths: ' + str(ilens))
         elayer_states = []
         for layer in six.moves.range(self.elayers):
             xs_pack = pack_padded_sequence(xs_pad, ilens, batch_first=True)
@@ -80,10 +81,8 @@ class RNNP(torch.nn.Module):
 
         return xs_pad, ilens, elayer_states  # x: utt list of frame x dim
 
-
 class RNN(torch.nn.Module):
     """RNN module
-
     :param int idim: dimension of inputs
     :param int elayers: number of encoder layers
     :param int cdim: number of rnn units (resulted in cdim * 2 if bidirectional)
@@ -97,8 +96,8 @@ class RNN(torch.nn.Module):
         bidir = typ[0] == "b"
         self.nbrnn = torch.nn.LSTM(idim, cdim, elayers, batch_first=True,
                                    dropout=dropout, bidirectional=bidir) if "lstm" in typ \
-            else torch.nn.GRU(idim, cdim, elayers, batch_first=True, dropout=dropout,
-                              bidirectional=bidir)
+            else torch.nn.GRU(idim, cdim, elayers, batch_first=True,
+                                       dropout=dropout, bidirectional=bidir)
         if bidir:
             self.l_last = torch.nn.Linear(cdim * 2, hdim)
         else:
@@ -107,7 +106,6 @@ class RNN(torch.nn.Module):
 
     def forward(self, xs_pad, ilens, prev_state=None):
         """RNN forward
-
         :param torch.Tensor xs_pad: batch of padded input sequences (B, Tmax, D)
         :param torch.Tensor ilens: batch of lengths of input sequences (B)
         :param torch.Tensor prev_state: batch of previous RNN states
@@ -140,7 +138,6 @@ def reset_backward_rnn_state(states):
         states[1::2] = 0.
     return states
 
-
 class VGG2L(torch.nn.Module):
     """VGG-like module
 
@@ -171,16 +168,23 @@ class VGG2L(torch.nn.Module):
         # xs_pad = F.pad_sequence(xs_pad)
 
         # x: utt x 1 (input channel num) x frame x dim
+        #xs_pad = self.ln0(xs_pad)C
         xs_pad = xs_pad.view(xs_pad.size(0), xs_pad.size(1), self.in_channel,
                              xs_pad.size(2) // self.in_channel).transpose(1, 2)
 
+
         # NOTE: max_pool1d ?
         xs_pad = F.relu(self.conv1_1(xs_pad))
+        logging.info(xs_pad.shape)
         xs_pad = F.relu(self.conv1_2(xs_pad))
+        logging.info(xs_pad.shape)
         xs_pad = F.max_pool2d(xs_pad, 2, stride=2, ceil_mode=True)
 
+
         xs_pad = F.relu(self.conv2_1(xs_pad))
+        logging.info(xs_pad.shape)
         xs_pad = F.relu(self.conv2_2(xs_pad))
+        logging.info(xs_pad.shape)
         xs_pad = F.max_pool2d(xs_pad, 2, stride=2, ceil_mode=True)
         if torch.is_tensor(ilens):
             ilens = ilens.cpu().numpy()
@@ -194,6 +198,7 @@ class VGG2L(torch.nn.Module):
         xs_pad = xs_pad.transpose(1, 2)
         xs_pad = xs_pad.contiguous().view(
             xs_pad.size(0), xs_pad.size(1), xs_pad.size(2) * xs_pad.size(3))
+
         return xs_pad, ilens, None  # no state in this layer
 
 
@@ -212,8 +217,9 @@ class Encoder(torch.nn.Module):
 
     def __init__(self, etype, idim, elayers, eunits, eprojs, subsample, dropout, in_channel=1):
         super(Encoder, self).__init__()
-        typ = etype.lstrip("vgg").rstrip("p")
-        if typ not in ['lstm', 'gru', 'blstm', 'bgru']:
+        typ = etype.lstrip("vgg").lstrip("sinc").rstrip("p")
+        logging.info("Error: hello")
+        if typ not in ['lstm', 'gru', 'blstm', 'bgru', 'bligru', 'blstm']:
             logging.error("Error: need to specify an appropriate encoder architecture")
 
         if etype.startswith("vgg"):
@@ -223,6 +229,12 @@ class Encoder(torch.nn.Module):
                                                      eprojs,
                                                      subsample, dropout, typ=typ)])
                 logging.info('Use CNN-VGG + ' + typ.upper() + 'P for encoder')
+            elif etype[-1] == "s":
+                self.enc = torch.nn.ModuleList([SincNet(sincnet=True, nb_filters=512),
+                                                RNN(256, elayers, eunits,
+                                                    eprojs,
+                                                    dropout, typ=typ)])
+                logging.info('Use Raw SincNet + ' + typ.upper() + ' for encoder')
             else:
                 self.enc = torch.nn.ModuleList([VGG2L(in_channel),
                                                 RNN(get_vgg2l_odim(idim, in_channel=in_channel), elayers, eunits,
@@ -259,30 +271,9 @@ class Encoder(torch.nn.Module):
         # make mask to remove bias value in padded part
         mask = to_device(self, make_pad_mask(ilens).unsqueeze(-1))
 
+
         return xs_pad.masked_fill(mask, 0.0), ilens, current_states
 
 
 def encoder_for(args, idim, subsample):
-    """Instantiates an encoder module given the program arguments
-
-    :param Namespace args: The arguments
-    :param int or List of integer idim: dimension of input, e.g. 83, or
-                                        List of dimensions of inputs, e.g. [83,83]
-    :param List or List of List subsample: subsample factors, e.g. [1,2,2,1,1], or
-                                        List of subsample factors of each encoder. e.g. [[1,2,2,1,1], [1,2,2,1,1]]
-    :rtype torch.nn.Module
-    :return: The encoder module
-    """
-    num_encs = getattr(args, "num_encs", 1)  # use getattr to keep compatibility
-    if num_encs == 1:
-        # compatible with single encoder asr mode
-        return Encoder(args.etype, idim, args.elayers, args.eunits, args.eprojs, subsample, args.dropout_rate)
-    elif num_encs >= 1:
-        enc_list = torch.nn.ModuleList()
-        for idx in range(num_encs):
-            enc = Encoder(args.etype[idx], idim[idx], args.elayers[idx], args.eunits[idx], args.eprojs, subsample[idx],
-                          args.dropout_rate[idx])
-            enc_list.append(enc)
-        return enc_list
-    else:
-        raise ValueError("Number of encoders needs to be more than one. {}".format(num_encs))
+    return Encoder(args.etype, idim, args.elayers, args.eunits, args.eprojs, subsample, args.dropout_rate)
