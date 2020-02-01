@@ -5,7 +5,6 @@
 This repository is a fork of [ESPnet](https://github.com/espnet/espnet) and contains the code for the paper *E2E-SincNet: toward fully end-to-end speech Recognition*. E2E-SincNet is partially integrated to [ESPnet](https://github.com/espnet/espnet) due to major differences in the input data pipeline. E2E-SincNet will be part of the [SpeechBrain](https://speechbrain.github.io) toolkit. The provided code makes it feasible to reproduce the results obtained in the paper *E2E-SincNet: toward fully end-to-end speech Recognition*.
 
 1. TIMIT recipe: Ready to be used.
-2. WSJ recipe: In progress... 
 
 # Installation
 
@@ -13,7 +12,7 @@ This repository is an enhanced version of an [ESPnet](https://github.com/espnet/
 
 # ASR datasets
 
-The current version of E2E-SincNet supports two ASR recipes with the TIMIT and Wall Street Journal datasets. Thus, two scripts named `run_sincnet.sh` are available in `egs/timit/asr1` and `egs/wsj/asr1` to reproduce the results observed on the paper *E2E-SincNet: toward fully end-to-end speech Recognition*.  
+The current version of E2E-SincNet supports an ASR recipe for the TIMIT dataset. Thus, a script named `run_sincnet.sh` is available in `egs/timit/asr1` to reproduce the results observed on the paper *E2E-SincNet: toward fully end-to-end speech Recognition*. Please note that the steps described in this README can be transposed to any recipe of the ESPnet toolkit. Therefore, WSJ results can be reproduced by following the same steps and modifying the `run.sh` script.  
 
 # Run the experiments
 
