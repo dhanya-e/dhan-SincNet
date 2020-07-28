@@ -27,8 +27,7 @@ decode_config=conf/decode.yaml
 recog_model=model.acc.best # set a model to be used for decoding: 'model.acc.best' or 'model.loss.best'
 
 # data
-#timit=/local_disk/galactica/laboinfo/parcollet/CORPUS/TIMIT/TIMIT/
-timit=/mnt/disk/Dhanya/Datasets/TIMIT_E2ESincNet
+air_kannada=/mnt/disk/Dhanya/AIR_kannada/AIR_Data_Final/
 trans_type=phn
 
 # exp tag
@@ -52,8 +51,13 @@ feat_dt_dir=${dumpdir}/${train_dev}; mkdir -p ${feat_dt_dir}
 if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
     ### copy the actual raw features
     echo "stage 1: Feature processing"
-    bash local/timit_data_prep.sh ${timit} ${trans_type} || exit 1
-    bash local/timit_format_data.sh || exit 1
+    
+    # pthon files fro AIR_Kannada data processing.
+    bash local/kannada_data_prep.sh $air_kannada
+    bash local/create_glm_stm.sh $air_kannada
+ 
+    #local/timit_data_prep.sh ${timit} ${trans_type} || exit 1
+    bash local/kannada_format_data.sh || exit 1
 
     # compute global CMVN for normalization
     compute-cmvn-stats scp:data/${train_set}/feats_raw.scp data/${train_set}/cmvn.ark
@@ -72,7 +76,6 @@ if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
         ${feat_recog_dir}
     done
 fi
-
 
 dict=data/lang_1char/train_nodev_units.txt
 echo "dictionary: ${dict}"
@@ -108,7 +111,6 @@ if [ -z ${tag} ]; then
 else
     expname=${train_set}_${backend}_${tag}
 fi
-
 
 expdir=exp/${expname}
 mkdir -p ${expdir}

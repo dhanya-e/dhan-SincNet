@@ -19,24 +19,23 @@ import sys
 
 # Run it for all the data chunks (e.g., train, dev, test) => uncomment
 
-lab_folder='/home/dhanya/kaldi/egs/timit1/s5/exp/dnn4_pretrain-dbn_dnn_ali_test'
-lab_opts='ali-to-pdf'
-out_folder='/home/dhanya/espnet/egs/timit1/asr1/data/test_raw_25ms'
-wav_lst='/home/dhanya/espnet/egs/timit1/asr1/data/test_raw_25ms/wav.lst'
-scp_file_out='/home/dhanya/espnet/egs/timit1/asr1/data/test_raw_25ms/feats_raw.scp'
+# lab_folder='/home/dhanya/kaldi/egs/AIR_loop_a_4/s5/exp/tri3_ali'
+# lab_opts='ali-to-pdf'
+# out_folder='/home/dhanya/espnet/egs/AIR_kannada/asr1/data/train_raw_nodev_25ms'
+# wav_lst='/home/dhanya/espnet/egs/AIR_kannada/asr1/data/train_raw_nodev_25ms/wav.lst'
+# scp_file_out='/home/dhanya/espnet/egs/AIR_kannada/asr1/data/train_raw_nodev_25ms/feats_raw.scp'
 
-lab_folder='/home/dhanya/kaldi/egs/timit1/s5/exp/dnn4_pretrain-dbn_dnn_ali'
-lab_opts='ali-to-pdf'
-out_folder='/home/dhanya/espnet/egs/timit1/asr1/data/train_raw_nodev_25ms'
-wav_lst='/home/dhanya/espnet/egs/timit1/asr1/data/train_raw_nodev_25ms/wav.lst'
-scp_file_out='/home/dhanya/espnet/egs/timit1/asr1/data/train_raw_nodev_25ms/feats_raw.scp'
+# lab_folder='/home/dhanya/kaldi/egs/AIR_loop_a_4/s5/exp/tri3_ali_dev'
+# lab_opts='ali-to-pdf'
+# out_folder='/home/dhanya/espnet/egs/AIR_kannada/asr1/data/train_raw_dev_25ms'
+# wav_lst='/home/dhanya/espnet/egs/AIR_kannada/asr1/data/train_raw_dev_25ms/wav.lst'
+# scp_file_out='/home/dhanya/espnet/egs/AIR_kannada/asr1/data/train_raw_dev_25ms/feats_raw.scp'
 
-lab_folder='/home/dhanya/kaldi/egs/timit1/s5/exp/dnn4_pretrain-dbn_dnn_ali_dev'
+lab_folder='/home/dhanya/kaldi/egs/AIR_loop_a_4/s5/exp/tri3_ali_test'
 lab_opts='ali-to-pdf'
-out_folder='/home/dhanya/espnet/egs/timit1/asr1/data/train_raw_dev_25ms'
-wav_lst='/home/dhanya/espnet/egs/timit1/asr1/data/train_raw_dev_25ms/wav.lst'
-scp_file_out='/home/dhanya/espnet/egs/timit1/asr1/data/train_raw_dev_25ms/feats_raw.scp'
-
+out_folder='/home/dhanya/espnet/egs/AIR_kannada/asr1/data/test_raw_25ms'
+wav_lst='/home/dhanya/espnet/egs/AIR_kannada/asr1/data/test_raw_25ms/wav.lst'
+scp_file_out='/home/dhanya/espnet/egs/AIR_kannada/asr1/data/test_raw_25ms/feats_raw.scp'
 
 sig_fs=16000 # Hz
 sig_wlen=25 # ms
