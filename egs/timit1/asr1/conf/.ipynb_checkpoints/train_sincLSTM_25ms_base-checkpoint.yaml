@@ -1,0 +1,34 @@
+# network architecture
+# encoder related
+etype: vggblstms     # encoder architecture type
+elayers: 4
+eunits: 512
+eprojs: 512
+subsample: "1_1_1_1_1" # skip every n frame from input to nth layers
+# decoder related
+dlayers: 1
+dunits: 512
+# attention related
+atype: location
+adim: 512
+aconv-chans: 10
+aconv-filts: 100
+
+# hybrid CTC/attention
+mtlalpha: 0.5
+
+# minibatch related
+batch-size: 4
+maxlen-in: 500  # if input length  > maxlen_in, batchsize is automatically reduced
+maxlen-out: 150 # if output length > maxlen_out, batchsize is automatically reduced
+
+# optimization related
+sortagrad: 0
+opt: adadelta
+epochs: 25
+#dropout-rate: 0.2
+#dropout-rate-decoder: 0.0
+patience: 0
+
+# scheduled sampling option
+sampling-probability: 0.0
